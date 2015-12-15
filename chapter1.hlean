@@ -1,6 +1,27 @@
 import algebra.ring
 import function
+open sigma
+open sigma.ops
+open prod
+open prod.ops
 open eq
+
+section ex2
+  definition sigma_rec {A : Type} {B : A → Type} {C : Type} (f : Π (a : A), B(a) → C) (p : Σ (x : A), B x) :  C :=
+  f (pr₁ p) (pr₂ p)
+
+  definition sigma_comp {A : Type} {B : A → Type} {C : Type} (f : Π (a : A), B(a) → C) (a : A) (p : B a) : sigma_rec f ⟨a, p⟩ = (f a p) :=
+  rfl
+end ex2
+
+section ex3
+  definition prod_rec {A : Type} {B : Type} {C : Type} (f : A → B → C) (p : A × B) : C :=
+  f (pr₁ p) (pr₂ p)
+
+  definition prod_comp {A : Type} {B : Type} {C : Type} (f : A → B → C) (a : A) (b : B) : prod_rec f (a, b) = (f a b) :=
+  rfl
+
+end ex3
 
 namespace nat
 
