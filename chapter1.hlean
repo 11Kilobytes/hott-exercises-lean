@@ -15,25 +15,59 @@
 import algebra.ring
 import function
 open sigma
-open sigma.ops
 open prod
-open prod.ops
 open eq
 
 section ex2
-  definition sigma_rec {A : Type} {B : A → Type} {C : Type} (f : Π (a : A), B(a) → C) (p : Σ (x : A), B x) :  C :=
-  f (pr₁ p) (pr₂ p)
+  section sigma
+    open sigma.ops
+    variables {A : Type} {B : A → Type} {C : Type} (f : Π (a : A), B(a) → C)
 
-  theorem sigma_comp {A : Type} {B : A → Type} {C : Type} (f : Π (a : A), B(a) → C) (a : A) (p : B a) : sigma_rec f ⟨a, p⟩ = (f a p) :=
-  rfl
-  definition prod_rec {A : Type} {B : Type} {C : Type} (f : A → B → C) (p : A × B) : C :=
-  f (pr₁ p) (pr₂ p)
+    definition sigma_rec (p : Σ (x : A), B x) :  C :=
+    f (pr₁ p) (pr₂ p)
 
-  definition prod_comp {A : Type} {B : Type} {C : Type} (f : A → B → C) (a : A) (b : B) : prod_rec f (a, b) = (f a b) :=
-  rfl
+    theorem sigma_comp (a : A) (p : B a) : sigma_rec f ⟨a, p⟩ = (f a p) :=
+    rfl
+  end sigma
+
+  section prod
+    open prod.ops
+    variables {A : Type} {B : Type} {C : Type} (f : A → B → C)
+    definition prod_rec (p : A × B) : C :=
+    f (pr₁ p) (pr₂ p)
+
+    definition prod_comp (a : A) (b : B) : prod_rec f (a, b) = (f a b) :=
+    rfl
+  end prod
 end ex2
 
+section ex3
+  section sigma
+    open sigma.ops
+    variables {A : Type} {B : A → Type} {C : (Σ (x : A), B x) → Type} (f : Π (a : A) (b : B a), C ⟨a, b⟩)
+
+    definition sigma_ind (p : Σ (x : A), B x) : C p :=
+    (sigma.eta p) ▸ (f (pr₁ p) (pr₂ p))
+
+    theorem sigma_ind_comp (a : A) (b : B a) : sigma_ind f ⟨a, b⟩ = (f a b) :=
+    rfl
+  end sigma
+
+  section prod
+    open prod.ops
+    variables {A : Type} {B : Type} {C : A × B → Type} (f : Π (a : A) (b : B), C (a, b))
+
+    definition prod_ind (p : A × B) : C p :=
+    (prod.eta p) ▸ (f (pr₁ p) (pr₂ p))
+
+    definition prod_ind_comp (a : A) (b : B) : prod_ind f (a, b) = (f a b) :=
+    rfl
+  end prod
+end ex3
+
 namespace nat
+  open prod.ops
+
   definition iter {C : Type} (c₀ : C) (cS : C → C) : ℕ → C
   | iter 0 := c₀
   | iter (succ n) := cS (iter n)
