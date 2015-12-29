@@ -180,7 +180,7 @@ namespace nat
                                 ... = (a * b + b) + (succ a) : { IH }
                                 ... = a * b + (b + (succ a)) : add_assoc (a * b) b (succ a)
                                 ... = a * b + (b + (1 + a)) : { one_add a }
-                                ... = a * b + ((b + 1) + a) : add_assoc b 1 a
+                                ... = a * b + ((b + 1) + a) : { (add_assoc b 1 a)⁻¹ }
                                 ... = a * b + ((succ b) + a) : rfl
                                 ... = a * b + (a + (succ b)) : { add_comm (succ b) a }
                                 ... = (a * b + a) + (succ b) : (add_assoc (a * b) a (succ b))⁻¹
@@ -200,39 +200,27 @@ namespace nat
 
 
     theorem left_distrib (a b c : ℕ) : a * (b + c) = a * b + a * c :=
-    nat.rec_on a
-      (show 0 * (b + c) = 0 * b + 0 * c, from
-        calc 0 * (b + c) = 0 : (zero_mul (b + c))
-                    ... = 0 + 0 : rfl
-                    ... = 0 * b + 0 : { (zero_mul b)⁻¹ }
-                    ... = 0 * b + 0 * c : { (zero_mul c)⁻¹ })
-      (take a,
+    nat.rec_on c
+      (proof rfl qed)
+      (take c,
         assume IH : a * (b + c) = a * b + a * c,
-        show (succ a) * (b + c) = (succ a) * b + (succ a) * c, from
-          calc (succ a) * (b + c) = (b + c) * (succ a) : mul_comm (succ a) (b + c)
-                             ... = b * (succ a) + c * (succ a) : right_distrib b c (succ a)
-                             ... = (succ a) * b + c * (succ a) : { mul_comm b (succ a) }
-                             ... = (succ a) * b + (succ a) * c : { mul_comm c (succ a) })
+        show a * (b + (succ c)) =  a * b + a * (succ c), from
+          calc a * (b + (succ c)) = a * (succ (b + c)) : rfl
+                              ... = a * (b + c) + a : rfl
+                              ... = (a * b + a * c) + a : { IH }
+                              ... = a * b + (a * c + a) : add_assoc (a * b) (a * c) a
+                              ... = a * b + a * (succ c) : rfl)
 
-    theorem mul_assoc : Π (a b c : ℕ), (a * b) * c = a * (b * c)
-    | mul_assoc a b 0 := proof rfl qed
-    | mul_assoc a 0 c :=
-      calc (a * 0) * c = 0 * c : rfl
-                   ... = 0 : zero_mul c
-                   ... = a * 0 : rfl
-                   ... = a * (0 * c) : { (zero_mul c)⁻¹ }
-    | mul_assoc 0 b c :=
-      calc (0 * b) * c = 0 * c : { zero_mul b }
-                   ... = 0 : zero_mul c
-                   ... = 0 * (b * c) : (zero_mul (b * c))⁻¹
-    | mul_assoc (succ a) (succ b) (succ c) :=
-      calc ((succ a) * (succ b)) * (succ c) = ((succ a) * b + (succ a)) * (succ c) : rfl
-                                         ... = (((succ a) * b) * (succ c)) + (succ a) * (succ c) : right_distrib ((succ a) * b) (succ a) (succ c)
-                                         ... = (succ a) * (b * (succ c)) + (succ a) * (succ c): { mul_assoc (succ a) b (succ c) }
-                                         ... = (succ a) * ((b * (succ c)) + (succ c)) : { (left_distrib (succ a) (b * (succ c)) (succ c))⁻¹ }
-                                         ... = (succ a) * (((succ c) * b) + (succ c)) : { mul_comm b (succ c) }
-                                         ... = (succ a) * ((succ c) * (succ b)) : rfl
-                                         ... = (succ a) * ((succ b) * (succ c)) : { mul_comm (succ c) (succ b) }
+    theorem mul_assoc (a b c : ℕ) : (a * b) * c = a * (b * c) :=
+    nat.rec_on c
+      (show (a * b) * 0 = a * (b * 0), by apply rfl)
+      (take c,
+        assume IH : (a * b) * c = a * (b * c),
+        show (a * b) * (succ c) = a * (b * (succ c)), from
+          calc (a * b) * (succ c) = (a * b) * c + a * b : rfl
+                              ... = a * (b * c) + a * b : { IH }
+                              ... = a * ((b * c) + b)   : { (left_distrib a (b * c) b)⁻¹ }
+                              ... = a * (b * (succ c))  : rfl)
 
     definition semiring := {| algebra.semiring ℕ,
                               is_hset_carrier := is_hset_of_decidable_eq,
