@@ -1,0 +1,6 @@
+.ninja_*
+.flycheck*
+TAGS
+*.clean
+*.ilean
+*.olean
