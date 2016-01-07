@@ -65,9 +65,9 @@ section ex3
   end prod
 end ex3
 
-namespace nat
-  open prod.ops
 
+  open prod.ops
+  open nat
   definition iter {C : Type} (c₀ : C) (cS : C → C) : ℕ → C
   | iter 0 := c₀
   | iter (succ n) := cS (iter n)
@@ -105,168 +105,168 @@ namespace nat
                                       ... = cS (succ n) (rec' c₀ cS (succ n)) : { IH })
   end ex4
 
-  section ex8
-    definition exp : ℕ → ℕ → ℕ
-    | exp x 0 := 1
-    | exp x (succ n) := x * exp x n
+section ex8
+  open nat 
+  definition exp : ℕ → ℕ → ℕ
+  | exp x 0 := 1
+  | exp x (succ n) := x * exp x n
 
-    definition exp' : ℕ → ℕ → ℕ := function.flip (nat.rec (λ n, 1) (λ n f x, x * f x))
+  definition exp' : ℕ → ℕ → ℕ := function.flip (nat.rec (λ n, 1) (λ n f x, x * f x))
 
-    theorem add_zero (a : ℕ) : a + 0 = a := rfl
+  theorem add_zero (a : ℕ) : a + 0 = a := rfl
 
-    theorem zero_add  (a : ℕ) : 0 + a = a :=
-    nat.rec_on a
-      (show 0 + 0 = 0, from rfl)
-      (take a,
-        assume IH : 0 + a = a,
-        show 0 + (succ a) = (succ a), from
-          calc 0 + (succ a) = (succ (0 + a)) : rfl
-                         ... = (succ a) : ap succ IH)
+  theorem zero_add  (a : ℕ) : 0 + a = a :=
+  nat.rec_on a
+    (show 0 + 0 = 0, from rfl)
+    (take a,
+      assume IH : 0 + a = a,
+      show 0 + (succ a) = (succ a), from
+        calc 0 + (succ a) = (succ (0 + a)) : rfl
+                        ... = (succ a) : ap succ IH)
 
-    theorem add_assoc (a b c : ℕ) : (a + b) + c = a + (b + c) :=
-    nat.rec_on c
-      (show (a + b) + 0 = a + (b + 0), from rfl)
-      (take n,
-        assume IH : (a + b) + n = a + (b + n),
-        show (a + b) + (succ n) = a + (b + (succ n)), from
-          calc (a + b) + (succ n) = succ ((a + b) + n) : rfl
-                               ... = succ (a + (b + n)) : ap succ IH
-                               ... = a + (succ (b + n)) : rfl
-                               ... = a + (b + (succ n)) : rfl)
+  theorem add_assoc (a b c : ℕ) : (a + b) + c = a + (b + c) :=
+  nat.rec_on c
+    (show (a + b) + 0 = a + (b + 0), from rfl)
+    (take n,
+      assume IH : (a + b) + n = a + (b + n),
+      show (a + b) + (succ n) = a + (b + (succ n)), from
+        calc (a + b) + (succ n) = succ ((a + b) + n) : rfl
+                              ... = succ (a + (b + n)) : ap succ IH
+                              ... = a + (succ (b + n)) : rfl
+                              ... = a + (b + (succ n)) : rfl)
 
-    theorem one_add (a : ℕ) : (succ a) = 1 + a :=
-    nat.rec_on a
-      (show (succ 0) = 1 + 0, from rfl)
-      (take a,
-        assume IH : (succ a) = 1 + a,
-        show (succ (succ a)) = 1 + (succ a), from
-          calc (succ (succ a)) = (succ a) + 1 : rfl
-                           ... = (1 + a) + 1 : { IH }
-                           ... = 1 + (a + 1) : add_assoc 1 a 1
-                           ... = 1 + (succ a) : rfl)
+  theorem one_add (a : ℕ) : (succ a) = 1 + a :=
+  nat.rec_on a
+    (show (succ 0) = 1 + 0, from rfl)
+    (take a,
+      assume IH : (succ a) = 1 + a,
+      show (succ (succ a)) = 1 + (succ a), from
+        calc (succ (succ a)) = (succ a) + 1 : rfl
+                          ... = (1 + a) + 1 : { IH }
+                          ... = 1 + (a + 1) : add_assoc 1 a 1
+                          ... = 1 + (succ a) : rfl)
 
-    theorem add_comm (a b : ℕ) : a + b = b + a :=
-    nat.rec_on b
-      (show a + 0 = 0 + a, from (zero_add a)⁻¹)
-      (take b,
-        assume IH : a + b = b + a,
-        show a + (succ b) = (succ b) + a, from
-          calc a + (succ b) = (succ (a + b)) : rfl
-                         ... = (succ (b + a)) : ap succ IH
-                         ... = 1 + (b + a) : one_add (b + a)
-                         ... = (1 + b) + a : add_assoc 1 b a
-                         ... = (succ b) + a : { (one_add b)⁻¹ })
+  theorem add_comm (a b : ℕ) : a + b = b + a :=
+  nat.rec_on b
+    (show a + 0 = 0 + a, from (zero_add a)⁻¹)
+    (take b,
+      assume IH : a + b = b + a,
+      show a + (succ b) = (succ b) + a, from
+        calc a + (succ b) = (succ (a + b)) : rfl
+                        ... = (succ (b + a)) : ap succ IH
+                        ... = 1 + (b + a) : one_add (b + a)
+                        ... = (1 + b) + a : add_assoc 1 b a
+                        ... = (succ b) + a : { (one_add b)⁻¹ })
 
-    theorem one_mul (a : ℕ) : 1 * a = a :=
-    nat.rec_on a
-      (show 1 * 0 = 0, from rfl)
-      (take a,
-        assume IH : 1 * a = a,
-        show 1 * (succ a) = (succ a), from
-          calc 1 * (succ a) = (1 * a) + 1 : rfl
-                         ... = a + 1 : { IH }
-                         ... = (succ a) : rfl)
+  theorem one_mul (a : ℕ) : 1 * a = a :=
+  nat.rec_on a
+    (show 1 * 0 = 0, from rfl)
+    (take a,
+      assume IH : 1 * a = a,
+      show 1 * (succ a) = (succ a), from
+        calc 1 * (succ a) = (1 * a) + 1 : rfl
+                        ... = a + 1 : { IH }
+                        ... = (succ a) : rfl)
 
-    theorem mul_one (a : ℕ) : a * 1 = a :=
-      calc a * 1 = (a * 0) + a : rfl
-             ... = 0 + a : rfl
-             ... = a : zero_add a
+  theorem mul_one (a : ℕ) : a * 1 = a :=
+    calc a * 1 = (a * 0) + a : rfl
+            ... = 0 + a : rfl
+            ... = a : zero_add a
 
-    theorem zero_mul (a : ℕ) : 0 * a = 0 :=
-    nat.rec_on a
-      (show 0 * 0 = 0, from rfl)
-      (take a,
-        assume IH : 0 * a = 0,
-        show 0 * (succ a) = 0, from
-          calc 0 * (succ a) = 0 * a + 0 : rfl
-                         ... = 0 + 0 : { IH }
-                         ... = 0 : rfl)
+  theorem zero_mul (a : ℕ) : 0 * a = 0 :=
+  nat.rec_on a
+    (show 0 * 0 = 0, from rfl)
+    (take a,
+      assume IH : 0 * a = 0,
+      show 0 * (succ a) = 0, from
+        calc 0 * (succ a) = 0 * a + 0 : rfl
+                        ... = 0 + 0 : { IH }
+                        ... = 0 : rfl)
 
-    theorem mul_zero (a : ℕ) : a * 0 = 0 := rfl
+  theorem mul_zero (a : ℕ) : a * 0 = 0 := rfl
 
-    theorem right_distrib (a b c : ℕ) : (a + b) * c = a * c + b * c :=
-    nat.rec_on c
-      (show (a + b) * 0 = a * 0 + b * 0, from rfl)
-      (take c,
-        assume IH : (a + b) * c = a * c + b * c,
-        show (a + b) * (succ c) = a * (succ c) + b * (succ c), from
-          calc (a + b) * (succ c) = ((a + b) * c) + (a + b) : rfl
-                               ... = (a * c + b * c) + (a + b) : { IH }
-                               ... = a * c + (b * c + (a + b)) : { add_assoc (a * c) (b * c) (a + b) }
-                               ... = a * c + (b * c + (b + a)) : { add_comm a b }
-                               ... = a * c + ((b * c + b) + a) : { (add_assoc (b * c)  b a)⁻¹ }
-                               ... = a * c + (b * (succ c) + a) : rfl
-                               ... = a * c + (a + b * (succ c)) : { add_comm (b * (succ c)) a }
-                               ... = (a * c + a) + b * (succ c) : (add_assoc (a * c) a (b * (succ c)))⁻¹
-                               ... = a * (succ c) + b * (succ c) : rfl)
+  theorem right_distrib (a b c : ℕ) : (a + b) * c = a * c + b * c :=
+  nat.rec_on c
+    (show (a + b) * 0 = a * 0 + b * 0, from rfl)
+    (take c,
+      assume IH : (a + b) * c = a * c + b * c,
+      show (a + b) * (succ c) = a * (succ c) + b * (succ c), from
+        calc (a + b) * (succ c) = ((a + b) * c) + (a + b) : rfl
+                              ... = (a * c + b * c) + (a + b) : { IH }
+                              ... = a * c + (b * c + (a + b)) : { add_assoc (a * c) (b * c) (a + b) }
+                              ... = a * c + (b * c + (b + a)) : { add_comm a b }
+                              ... = a * c + ((b * c + b) + a) : { (add_assoc (b * c)  b a)⁻¹ }
+                              ... = a * c + (b * (succ c) + a) : rfl
+                              ... = a * c + (a + b * (succ c)) : { add_comm (b * (succ c)) a }
+                              ... = (a * c + a) + b * (succ c) : (add_assoc (a * c) a (b * (succ c)))⁻¹
+                              ... = a * (succ c) + b * (succ c) : rfl)
 
-    lemma succ_mul (a b : ℕ) : (succ a) * b = a * b + b :=
-    nat.rec_on b
-      (show (succ a) * 0 = a * 0 + 0, from rfl)
-      (take b,
-        assume IH : (succ a) * b = a * b + b,
-        show (succ a) * (succ b) = a * (succ b) + (succ b), from
-          calc (succ a) * (succ b) = (succ a) * b + (succ a) : rfl
-                                ... = (a * b + b) + (succ a) : { IH }
-                                ... = a * b + (b + (succ a)) : add_assoc (a * b) b (succ a)
-                                ... = a * b + (b + (1 + a)) : { one_add a }
-                                ... = a * b + ((b + 1) + a) : { (add_assoc b 1 a)⁻¹ }
-                                ... = a * b + ((succ b) + a) : rfl
-                                ... = a * b + (a + (succ b)) : { add_comm (succ b) a }
-                                ... = (a * b + a) + (succ b) : (add_assoc (a * b) a (succ b))⁻¹
-                                ... = a * (succ b) + (succ b) : rfl)
+  lemma succ_mul (a b : ℕ) : (succ a) * b = a * b + b :=
+  nat.rec_on b
+    (show (succ a) * 0 = a * 0 + 0, from rfl)
+    (take b,
+      assume IH : (succ a) * b = a * b + b,
+      show (succ a) * (succ b) = a * (succ b) + (succ b), from
+        calc (succ a) * (succ b) = (succ a) * b + (succ a) : rfl
+                              ... = (a * b + b) + (succ a) : { IH }
+                              ... = a * b + (b + (succ a)) : add_assoc (a * b) b (succ a)
+                              ... = a * b + (b + (1 + a)) : { one_add a }
+                              ... = a * b + ((b + 1) + a) : { (add_assoc b 1 a)⁻¹ }
+                              ... = a * b + ((succ b) + a) : rfl
+                              ... = a * b + (a + (succ b)) : { add_comm (succ b) a }
+                              ... = (a * b + a) + (succ b) : (add_assoc (a * b) a (succ b))⁻¹
+                              ... = a * (succ b) + (succ b) : rfl)
 
-    theorem mul_comm (a b : ℕ) : a * b = b * a :=
-    nat.rec_on b
-      (show a * 0 = 0 * a, from
-        calc a * 0 = 0 : rfl
-             ... = 0 * a : (zero_mul a)⁻¹)
-      (take b,
-        assume IH : a * b = b * a,
-        show a * (succ b) = (succ b) * a, from
-          calc a * (succ b) = a * b + a : rfl
-                         ... = b * a + a : { IH }
-                         ... = (succ b) * a : (succ_mul b a)⁻¹)
+  theorem mul_comm (a b : ℕ) : a * b = b * a :=
+  nat.rec_on b
+    (show a * 0 = 0 * a, from
+      calc a * 0 = 0 : rfl
+            ... = 0 * a : (zero_mul a)⁻¹)
+    (take b,
+      assume IH : a * b = b * a,
+      show a * (succ b) = (succ b) * a, from
+        calc a * (succ b) = a * b + a : rfl
+                        ... = b * a + a : { IH }
+                        ... = (succ b) * a : (succ_mul b a)⁻¹)
 
 
-    theorem left_distrib (a b c : ℕ) : a * (b + c) = a * b + a * c :=
-    nat.rec_on c
-      (proof rfl qed)
-      (take c,
-        assume IH : a * (b + c) = a * b + a * c,
-        show a * (b + (succ c)) =  a * b + a * (succ c), from
-          calc a * (b + (succ c)) = a * (succ (b + c)) : rfl
-                              ... = a * (b + c) + a : rfl
-                              ... = (a * b + a * c) + a : { IH }
-                              ... = a * b + (a * c + a) : add_assoc (a * b) (a * c) a
-                              ... = a * b + a * (succ c) : rfl)
+  theorem left_distrib (a b c : ℕ) : a * (b + c) = a * b + a * c :=
+  nat.rec_on c
+    (show a * (b + 0) = a * b + a * 0, by reflexivity)
+    (take c,
+      assume IH : a * (b + c) = a * b + a * c,
+      show a * (b + (succ c)) =  a * b + a * (succ c), from
+        calc a * (b + (succ c)) = a * (succ (b + c)) : rfl
+                            ... = a * (b + c) + a : rfl
+                            ... = (a * b + a * c) + a : { IH }
+                            ... = a * b + (a * c + a) : add_assoc (a * b) (a * c) a
+                            ... = a * b + a * (succ c) : rfl)
 
-    theorem mul_assoc (a b c : ℕ) : (a * b) * c = a * (b * c) :=
-    nat.rec_on c
-      (show (a * b) * 0 = a * (b * 0), by apply rfl)
-      (take c,
-        assume IH : (a * b) * c = a * (b * c),
-        show (a * b) * (succ c) = a * (b * (succ c)), from
-          calc (a * b) * (succ c) = (a * b) * c + a * b : rfl
-                              ... = a * (b * c) + a * b : { IH }
-                              ... = a * ((b * c) + b)   : { (left_distrib a (b * c) b)⁻¹ }
-                              ... = a * (b * (succ c))  : rfl)
+  theorem mul_assoc (a b c : ℕ) : (a * b) * c = a * (b * c) :=
+  nat.rec_on c
+    (show (a * b) * 0 = a * (b * 0), by reflexivity)
+    (take c,
+      assume IH : (a * b) * c = a * (b * c),
+      show (a * b) * (succ c) = a * (b * (succ c)), from
+        calc (a * b) * (succ c) = (a * b) * c + a * b : rfl
+                            ... = a * (b * c) + a * b : { IH }
+                            ... = a * ((b * c) + b)   : { (left_distrib a (b * c) b)⁻¹ }
+                            ... = a * (b * (succ c))  : rfl)
 
-    definition semiring := {| algebra.semiring ℕ,
-                              is_hset_carrier := is_hset_of_decidable_eq,
-                              add := add,
-                              mul := mul,
-                              zero := 0,
-                              add_zero := add_zero,
-                              zero_add := zero_add,
-                              add_comm := add_comm,
-                              add_assoc := add_assoc,
-                              one_mul := one_mul,
-                              mul_one := mul_one,
-                              zero_mul := zero_mul,
-                              mul_zero := mul_zero,
-                              left_distrib := left_distrib,
-                              right_distrib := right_distrib,
-                              mul_assoc := mul_assoc |}
-  end ex8
-end nat
+  definition semiring := {| algebra.semiring ℕ,
+                            is_hset_carrier := is_hset_of_decidable_eq,
+                            add := add,
+                            mul := mul,
+                            zero := 0,
+                            add_zero := add_zero,
+                            zero_add := zero_add,
+                            add_comm := add_comm,
+                            add_assoc := add_assoc,
+                            one_mul := one_mul,
+                            mul_one := mul_one,
+                            zero_mul := zero_mul,
+                            mul_zero := mul_zero,
+                            left_distrib := left_distrib,
+                            right_distrib := right_distrib,
+                            mul_assoc := mul_assoc |}
+end ex8
