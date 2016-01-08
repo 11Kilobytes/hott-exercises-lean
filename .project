@@ -6,4 +6,4 @@
 - flycheck*.lean
 
 # Exclude emacs temp files
-- .#*.lean
+- .#*.hlean
