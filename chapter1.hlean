@@ -66,47 +66,65 @@ section ex3
 end ex3
 
 
-  open prod.ops
-  open nat
-  definition iter {C : Type} (c₀ : C) (cS : C → C) : ℕ → C
-  | iter 0 := c₀
-  | iter (succ n) := cS (iter n)
+open prod.ops
+open nat
+definition iter {C : Type} (c₀ : C) (cS : C → C) : ℕ → C
+| iter 0 := c₀
+| iter (succ n) := cS (iter n)
 
-  section ex4
-    variables {C : Type} (c₀ : C) (cS : ℕ → C → C)
+section ex4
+  variables {C : Type} (c₀ : C) (cS : ℕ → C → C)
 
-    definition rec_pair : ℕ → ℕ × C :=
-    iter (0, c₀) (λ x, (succ (pr₁ x), cS (pr₁ x) (pr₂ x)))
+  definition rec_pair : ℕ → ℕ × C :=
+  iter (0, c₀) (λ x, (succ (pr₁ x), cS (pr₁ x) (pr₂ x)))
 
-    definition rec' (n : ℕ) : C := pr₂ (rec_pair c₀ cS n)
+  definition rec' (n : ℕ) : C := pr₂ (rec_pair c₀ cS n)
 
-    theorem rec_comp₁ : rec' c₀ cS 0 = c₀ := rfl
+  theorem rec_comp₁ : rec' c₀ cS 0 = c₀ := rfl
 
-    lemma rec_pr₁ (n : ℕ) : pr₁ (rec_pair c₀ cS n) = n :=
-    nat.rec_on n
-      (show pr₁ (rec_pair c₀ cS 0) = 0, from rfl)
-      (take n,
-        assume IH : pr₁ (rec_pair c₀ cS n) = n,
-        show (pr₁ (rec_pair c₀ cS (succ n)) = (succ n)), from
-          calc pr₁ (rec_pair c₀ cS (succ n)) = pr₁ (succ (pr₁ (rec_pair c₀ cS n)), cS (pr₁ (rec_pair c₀ cS n)) (pr₂ (rec_pair c₀ cS n))) : rfl
-                                         ... = succ (pr₁ (rec_pair c₀ cS n)) : rfl
-                                         ... = succ n : ap succ IH)
+  lemma rec_pr₁ (n : ℕ) : pr₁ (rec_pair c₀ cS n) = n :=
+  nat.rec_on n
+    (show pr₁ (rec_pair c₀ cS 0) = 0, from rfl)
+    (take n,
+      assume IH : pr₁ (rec_pair c₀ cS n) = n,
+      show (pr₁ (rec_pair c₀ cS (succ n)) = (succ n)), from
+        calc pr₁ (rec_pair c₀ cS (succ n)) = pr₁ (succ (pr₁ (rec_pair c₀ cS n)), cS (pr₁ (rec_pair c₀ cS n)) (pr₂ (rec_pair c₀ cS n))) : rfl
+                                        ... = succ (pr₁ (rec_pair c₀ cS n)) : rfl
+                                        ... = succ n : ap succ IH)
 
-    theorem rec_comp₂ (n : ℕ) : rec' c₀ cS (succ n) = cS n (rec' c₀ cS n) :=
-    nat.rec_on n
-      (show rec' c₀ cS (succ 0) = cS 0 (rec' c₀ cS 0), from rfl)
-      (take n,
-        assume IH : rec' c₀ cS (succ n) = cS n (rec' c₀ cS n),
-        show rec' c₀ cS (succ (succ n)) = cS (succ n) (rec' c₀ cS (succ n)), from
-          calc rec' c₀ cS (succ (succ n)) = pr₂ (rec_pair c₀ cS (succ (succ n))) : rfl
-                                      ... = pr₂ (succ (pr₁ (rec_pair c₀ cS (succ n))), cS (pr₁ (rec_pair c₀ cS (succ n))) (pr₂ (rec_pair c₀ cS (succ n)))) : rfl
-                                      ... = cS (pr₁ (rec_pair c₀ cS (succ n))) (pr₂ (rec_pair c₀ cS (succ n))) : rfl
-                                      ... = cS (succ n) (pr₂ (rec_pair c₀ cS (succ n))) : { rec_pr₁ c₀ cS (succ n) }
-                                      ... = cS (succ n) (rec' c₀ cS (succ n)) : { IH })
-  end ex4
+  theorem rec_comp₂ (n : ℕ) : rec' c₀ cS (succ n) = cS n (rec' c₀ cS n) :=
+  nat.rec_on n
+    (show rec' c₀ cS (succ 0) = cS 0 (rec' c₀ cS 0), from rfl)
+    (take n,
+      assume IH : rec' c₀ cS (succ n) = cS n (rec' c₀ cS n),
+      show rec' c₀ cS (succ (succ n)) = cS (succ n) (rec' c₀ cS (succ n)), from
+        calc rec' c₀ cS (succ (succ n)) = pr₂ (rec_pair c₀ cS (succ (succ n))) : rfl
+                                    ... = pr₂ (succ (pr₁ (rec_pair c₀ cS (succ n))), cS (pr₁ (rec_pair c₀ cS (succ n))) (pr₂ (rec_pair c₀ cS (succ n)))) : rfl
+                                    ... = cS (pr₁ (rec_pair c₀ cS (succ n))) (pr₂ (rec_pair c₀ cS (succ n))) : rfl
+                                    ... = cS (succ n) (pr₂ (rec_pair c₀ cS (succ n))) : { rec_pr₁ c₀ cS (succ n) }
+                                    ... = cS (succ n) (rec' c₀ cS (succ n)) : { IH })
+end ex4
+
+section ex5
+  open sigma.ops
+  definition union.{u v} (A : Type.{u}) (B : Type.{v}) := Σ (x : bool), (@bool.rec_on.{(max u v) + 1} (λ x, Type.{max u v}) x (lift A) (lift B))
+  notation A `+` B := union A B
+
+  variables {A : Type} {B : Type}
+
+  definition inl (a : A) : A + B := ⟨bool.ff, (lift.up a)⟩
+  definition inr (b : B) : A + B := ⟨bool.tt, (lift.up b)⟩
+
+  definition union_ind {C : A + B → Type} (rec_l : Π (a : A), C (inl a)) (rec_r : Π (b : B), C (inr b)) (x : A + B) : C x :=
+  sigma.rec_on x
+    (bool.rec
+      (take a, (lift.up_down a) ▸ (rec_l (lift.down a)))
+      (take b, (lift.up_down b) ▸ (rec_r (lift.down b))))
+
+end ex5
 
 section ex8
-  open nat 
+  open nat
   definition exp : ℕ → ℕ → ℕ
   | exp x 0 := 1
   | exp x (succ n) := x * exp x n
