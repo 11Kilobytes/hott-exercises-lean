@@ -115,13 +115,51 @@ section ex5
   definition inl (a : A) : A + B := ⟨bool.ff, (lift.up a)⟩
   definition inr (b : B) : A + B := ⟨bool.tt, (lift.up b)⟩
 
-  definition union_ind {C : A + B → Type} (rec_l : Π (a : A), C (inl a)) (rec_r : Π (b : B), C (inr b)) (x : A + B) : C x :=
-  sigma.rec_on x
-    (bool.rec
-      (take a, (lift.up_down a) ▸ (rec_l (lift.down a)))
-      (take b, (lift.up_down b) ▸ (rec_r (lift.down b))))
+  definition union_ind {C : A + B → Type} (rec_l : Π (a : A), C (inl a)) (rec_r : Π (b : B), C (inr b)) : Π (x : A + B), C x
+  | union_ind ⟨bool.ff, a⟩ := (lift.up_down a) ▸ (rec_l (lift.down a))
+  | union_ind ⟨bool.tt, b⟩ := (lift.up_down b) ▸ (rec_r (lift.down b))
 
+  definition union_comp₁ {C : A + B → Type} (rec_l : Π (a : A), C (inl a)) (rec_r : Π (b : B), C (inr b)) (a : A) : (union_ind rec_l rec_r (inl a)) = (rec_l a) :=
+  by reflexivity
+
+  definition union_comp₂ {C : A + B → Type} (rec_l : Π (a : A), C (inl a)) (rec_r : Π (b : B), C (inr b)) (b : B) : (union_ind rec_l rec_r (inr b)) = (rec_r b) :=
+  by reflexivity
 end ex5
+
+section ex6
+  open sigma.ops
+  definition product.{u v} (A : Type.{u}) (B : Type.{v}) := Π (x : bool), (@bool.rec_on.{(max u v) + 1} (λ x, Type.{max u v}) x (lift A) (lift B))
+  notation A `×` B := product A B
+
+  variables {A : Type} {B : Type}
+  definition make_pair (a : A) (b : B) : A × B := (bool.rec (lift.up a) (lift.up b))
+
+  definition proj₁ (p : A × B) : A := (lift.down (p bool.ff))
+  definition proj₂ (p : A × B) : B := (lift.down (p bool.tt))
+
+  definition product_eta (p : A × B) : (make_pair (proj₁ p) (proj₂ p)) = p :=
+  eq_of_homotopy
+    (take x : bool,
+      bool.rec_on x
+        (show (make_pair (proj₁ p) (proj₂ p) bool.ff) = (p bool.ff), from (lift.up_down (p bool.ff)))
+        (show (make_pair (proj₁ p) (proj₂ p) bool.tt) = (p bool.tt), from (lift.up_down (p bool.tt))))
+
+  definition product_ind {C : A × B → Type} (f : Π (a : A) (b : B), C (make_pair a b)) (p : A × B) : C p :=
+  (product_eta p) ▸ (f (proj₁ p) (proj₂ p))
+
+  definition product_comp {C : A × B → Type} (f : Π (a : A) (b : B), C (make_pair a b)) (a : A) (b : B) : (product_ind f (make_pair a b)) = (f a b) :=
+  begin
+    unfold [product_ind, product_eta, make_pair, lift.up_down, proj₁, proj₂],
+    assert p : (λ x, bool.rec_on x (refl (lift.up a)) (refl (lift.up b))) = (λ x, refl (make_pair a b x)),
+    apply eq_of_homotopy (bool.rec rfl rfl),
+    unfold rfl,
+    unfold make_pair at p,
+    rewrite p, clear p,
+    fold (make_pair a b),
+    rewrite (eq_of_homotopy_idp (make_pair a b)),
+  end
+
+end ex6
 
 section ex8
   open nat
