@@ -158,8 +158,23 @@ section ex6
     fold (make_pair a b),
     rewrite (eq_of_homotopy_idp (make_pair a b)),
   end
-
 end ex6
+
+section ex7
+  open sigma.ops
+  variables {A : Type} (a : A) {P : Π (x : A), a = x → Type} {d : P a (refl a)}
+
+  definition contr_components (x y : A) (p : x = y) : ⟨x, (refl x)⟩ = ⟨y, p⟩ :=
+  eq.rec_on' p (λ a, rfl)
+
+  definition contr_path_space (a : A) (s : Σ (y : A), a = y) : ⟨a, (refl a)⟩ = s :=
+  (sigma.eta s) ▸ contr_components a (pr₁ s) (pr₂ s)
+
+  definition eq_ind (x : A) (p : a = x) : P x p :=
+  transport (λ s, P (pr₁ s) (pr₂ s)) (contr_path_space a ⟨x, p⟩) d
+
+  definition eq_comp : eq_ind a a (refl a) = a := rfl
+end ex7
 
 section ex8
   open nat
