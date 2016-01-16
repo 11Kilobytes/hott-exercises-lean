@@ -341,3 +341,13 @@ section ex8
                             right_distrib := right_distrib,
                             mul_assoc := mul_assoc |}
 end ex8
+
+section ex10
+  definition ack : ℕ → ℕ → ℕ :=
+  nat.rec (λ n, succ n)
+          (λ m ackₘ, nat.rec (ackₘ 1) (λ n, λ ackₛₘn, ackₘ ackₛₘn))
+
+  theorem comp₁ (n : ℕ) : ack 0 n = succ n := rfl
+  theorem comp₂ (m : ℕ) : ack (succ m) 0 = ack m 1 := rfl
+  theorem comp₃ (m n : ℕ) : ack (succ m) (succ n) = ack m (ack (succ m) n) := rfl
+end ex10
