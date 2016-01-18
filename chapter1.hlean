@@ -105,7 +105,7 @@ section ex4
                                     ... = cS (succ n) (rec' c₀ cS (succ n)) : { IH })
 end ex4
 
-section ex5
+namespace ex5
   open sigma.ops
   definition union.{u v} (A : Type.{u}) (B : Type.{v}) := Σ (x : bool), (@bool.rec_on.{(max u v) + 1} (λ x, Type.{max u v}) x (lift A) (lift B))
   notation A `+` B := union A B
@@ -369,3 +369,19 @@ section ex11
     have ¬¬A, from (suppose notA : ¬A, notA a),
     not³A this)
 end ex11
+
+section ex12
+  definition B_implies_A_of_A {A B C : Type} (a : A) : B → A :=
+  (take b, show A, from a)
+
+  definition not_not_A_of_A {A : Type} (a : A) : ¬¬A :=
+  (suppose notA : ¬A,
+    notA a)
+
+  theorem dm {A B : Type} (p : (¬A) + (¬B)) : ¬(A × B) :=
+  assume q,
+  obtain (a b), from q,
+  sum.cases_on p
+    (assume notA, notA a)
+    (assume notB, notB b)
+end ex12
