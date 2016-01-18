@@ -342,10 +342,21 @@ section ex8
                             mul_assoc := mul_assoc |}
 end ex8
 
+section ex9
+  definition less_than (x : ℕ) (y : ℕ) := Σ (d : ℕ), x + (succ d) = y
+
+  notation x `<₂` y := less_than x y
+  definition Fin (n : ℕ) := Σ (x : ℕ), x <₂ n
+
+  definition fmax : Π (n : ℕ), Fin (succ n)
+  | fmax 0 := ⟨0, ⟨0, rfl⟩⟩
+  | fmax (succ n) := ⟨n, ⟨1, rfl⟩⟩
+end ex9
+
 section ex10
   definition ack : ℕ → ℕ → ℕ :=
   nat.rec (λ n, succ n)
-          (λ m ackₘ, nat.rec (ackₘ 1) (λ n, λ ackₛₘn, ackₘ ackₛₘn))
+          (λ m ackₘ, nat.rec (ackₘ 1) (λ n ackₛₘn, ackₘ ackₛₘn))
 
   theorem comp₁ (n : ℕ) : ack 0 n = succ n := rfl
   theorem comp₂ (m : ℕ) : ack (succ m) 0 = ack m 1 := rfl
