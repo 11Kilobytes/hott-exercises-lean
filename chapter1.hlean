@@ -362,3 +362,10 @@ section ex10
   theorem comp₂ (m : ℕ) : ack (succ m) 0 = ack m 1 := rfl
   theorem comp₃ (m n : ℕ) : ack (succ m) (succ n) = ack m (ack (succ m) n) := rfl
 end ex10
+
+section ex11
+  definition dn_not {A : Type} (not³A : ¬¬¬A) : ¬A :=
+  (suppose a : A,
+    have ¬¬A, from (suppose notA : ¬A, notA a),
+    not³A this)
+end ex11
