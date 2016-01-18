@@ -394,3 +394,7 @@ section ex13
 
 end ex13
 
+section ex14
+  theorem indiscernibility {A : Type} {C : A → Type} {x y : A} (p : x = y) : C(x) → C(y) :=
+  eq.rec_on p id
+end ex14
