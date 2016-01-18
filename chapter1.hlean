@@ -385,3 +385,12 @@ section ex12
     (assume notA, notA a)
     (assume notB, notB b)
 end ex12
+
+section ex13
+  theorem not_not_dn {P : Type} : ¬¬(P + (¬P)) :=
+  assume notDecP : ¬(P + (¬P)),
+    assert decP : P + (¬P), from sum.inr (assume p : P, notDecP (sum.inl p)),
+  notDecP decP
+
+end ex13
+
