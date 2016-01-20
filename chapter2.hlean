@@ -42,7 +42,7 @@ section ex3
   theorem coh₄₃ : (p ·₄ q) = (p ·₃ q) := (coh₄₁ p q) ⬝ (coh₃ p q)⁻¹
 end ex3
 
-section ex4
+section ex5
   variables {A B : Type} {x y : A} (f : A → B) (p : x = y)
 
   definition precomp_tr_constant (q : f x = f y) : (p ▸ f x) = (f y) :=
@@ -57,7 +57,25 @@ section ex4
     calc
       (precomp_tr_constant f p (precomp_tr_constant_inv f p q))
           = tr_constant p (f x) ⬝ ((tr_constant p (f x))⁻¹ ⬝ q)  : rfl
-      ... = (tr_constant p (f x) ⬝ (tr_constant p (f x))⁻¹) ⬝ q  : by rewrite eq.con.assoc'
-      ... = idp ⬝ q                                             :  by rewrite eq.con.right_inv
+      ... = (tr_constant p (f x) ⬝ (tr_constant p (f x))⁻¹) ⬝ q  : by rewrite con.assoc'
+      ... = idp ⬝ q                                             :  by rewrite con.right_inv
       ... = q                                                   : idp_con)
-end ex4 
+
+  (take q : f x = f y,
+    calc
+      (precomp_tr_constant_inv f p (precomp_tr_constant f p q))
+           = (tr_constant p (f x))⁻¹ ⬝ (tr_constant p (f x) ⬝ q) : rfl
+       ... = ((tr_constant p (f x))⁻¹ ⬝ tr_constant p (f x)) ⬝ q : by rewrite con.assoc'
+       ... = idp ⬝ q                                            : by rewrite  con.left_inv
+       ... = q                                                  : idp_con)
+end ex5
+
+section ex6
+  variables {A : Type} {x y z : A} (p : x = y)
+
+  definition is_equiv_precomp_p :=
+  is_equiv.adjointify (λ q : y = z, p ⬝ q) (λ r : x = z, p⁻¹ ⬝ r)
+  (by intro r; rewrite con_inv_cancel_left)
+  (by intro q; rewrite inv_con_cancel_left)
+end ex6
+
