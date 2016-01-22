@@ -3,11 +3,11 @@ open eq
 section ex1
   variables {A : Type} {x y z : A} (p : x = y) (q : y = z)
 
-  definition concat₁ : x = z := eq.rec' (λ a z q, eq.rec' refl q) p z q
+  definition concat₁ : x = z := eq.rec' (λ a q, eq.rec' refl q) p q
 
-  definition concat₂ : x = z := eq.rec' (λ a z q, q) p z q
+  definition concat₂ : x = z := eq.rec' (λ a q, q) p q
 
-  definition concat₃ : x = z := eq.rec' (λ a z p, p) q z p
+  definition concat₃ : x = z := eq.rec' (λ a p, p) q p
 
   notation x `·₁` y := concat₁ x y
   notation x `·₂` y := concat₂ x y
@@ -78,4 +78,3 @@ section ex6
   (by intro r; rewrite con_inv_cancel_left)
   (by intro q; rewrite inv_con_cancel_left)
 end ex6
-
