@@ -1,3 +1,4 @@
+import init.default types.pi function_lemmas
 open eq
 
 section ex1
@@ -78,3 +79,34 @@ section ex6
   (by intro r; rewrite con_inv_cancel_left)
   (by intro q; rewrite inv_con_cancel_left)
 end ex6
+
+section ex7
+  open sigma sigma.ops function pi
+  variables {X X' : Type} {P : X → Type} {P' : X' → Type}
+  variables (g : X → X') (h : Π (x : X), (P x) → P' (g x))
+
+
+  definition componentwise_map (p : Σ (x : X), P x) : Σ (x : X'), P' x :=
+  ⟨g (pr₁ p), h (pr₁ p) (pr₂ p)⟩
+
+  variables {x y : Σ (x : X), P x} (p : pr₁ x = pr₁ y) (q : (pr₂ x) =[p] pr₂ y)
+
+  definition pr₂_ap_componentwise_map : h (pr₁ x) (pr₂ x) =[ap g p] h (pr₁ y) (pr₂ y) :=
+  have r₁ :  (p ▸ h (pr₁ x)) (pr₂ y) = h (pr₁ y) (pr₂ y),
+  from homotopy_of_eq (apd h p) (pr₂ y),
+  have r₂ : (p ▸ h (pr₁ x)) (pr₂ y) = (ap g p) ▸ h (pr₁ x) (pr₂ x), from
+    calc
+      transport (λ x, P(x) → P'(g x)) p (h (pr₁ x)) (pr₂ y)
+           = transport (P' ∘g) p (h (pr₁ x) (transport P (p⁻¹) (pr₂ y))) : func_transport p (h (pr₁ x)) (pr₂ y)
+       ... = transport (P' ∘g) p (h (pr₁ x) (pr₂ x))                     : ap _ (eq_tr_of_pathover q)⁻¹
+       ... = (ap g p) ▸ (h (pr₁ x) (pr₂ x))                               : tr_compose P' g p,
+  pathover_of_tr_eq (r₂⁻¹ ⬝ r₁)
+
+  definition ap_componentwise_map : ap (componentwise_map g h) (sigma_eq p q) = sigma_eq (ap g p) (pr₂_ap_componentwise_map g h p q) :=
+  begin
+    induction x, induction y,
+    esimp [pr₁, pr₂],
+    cases q,
+    reflexivity
+  end
+end ex7
