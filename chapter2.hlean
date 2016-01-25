@@ -1,4 +1,4 @@
-import init.default types.pi function_lemmas
+import init.default types.pi function_lemmas types.sum
 open eq
 
 section ex1
@@ -102,7 +102,8 @@ section ex7
        ... = (ap g p) ▸ (h (pr₁ x) (pr₂ x))                               : tr_compose P' g p,
   pathover_of_tr_eq (r₂⁻¹ ⬝ r₁)
 
-  definition ap_componentwise_map : ap (componentwise_map g h) (sigma_eq p q) = sigma_eq (ap g p) (pr₂_ap_componentwise_map g h p q) :=
+  definition ap_componentwise_map :   ap (componentwise_map g h) (sigma_eq p q)
+                                    = sigma_eq (ap g p) (pr₂_ap_componentwise_map g h p q) :=
   begin
     induction x, induction y,
     esimp [pr₁, pr₂],
@@ -110,3 +111,27 @@ section ex7
     reflexivity
   end
 end ex7
+
+section ex8
+  open sum function
+  variables {A A' B B' : Type} (g : A → A') (h : B → B')
+
+  definition partwise_map : (A + B) → (A' + B')
+  | partwise_map (inl a) := inl (g a)
+  | partwise_map (inr b) := inr (h b)
+
+
+  definition ap_partwise_map : Π {x y : A + B} (p : x = y), (partwise_map g h x) = (partwise_map g h y)
+  | @ap_partwise_map (inl a) (inl a') p := ap (inl ∘g) (lift.down (sum.encode p))
+  | @ap_partwise_map (inr b) (inr b') p := ap (inr ∘h) (lift.down (sum.encode p))
+  | @ap_partwise_map (inl a) (inr b) p := empty.cases_on _ (lift.down (sum.encode p))
+  | @ap_partwise_map (inr a) (inl b) p := empty.cases_on _ (lift.down (sum.encode p))
+
+  definition ap_partwise_map_eq_ap {x y : A + B} (p : x = y) : ap (partwise_map g h) p = ap_partwise_map g h p :=
+  begin
+    induction p,
+    cases x,
+    reflexivity,
+    reflexivity,
+  end
+end ex8
