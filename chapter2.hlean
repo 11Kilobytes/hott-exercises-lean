@@ -122,8 +122,8 @@ section ex8
 
 
   definition ap_partwise_map : Π {x y : A + B} (p : x = y), (partwise_map g h x) = (partwise_map g h y)
-  | @ap_partwise_map (inl a) (inl a') p := ap (inl ∘g) (lift.down (sum.encode p))
-  | @ap_partwise_map (inr b) (inr b') p := ap (inr ∘h) (lift.down (sum.encode p))
+  | @ap_partwise_map (inl a) (inl a') p := ap (inl ∘ g) (lift.down (sum.encode p))
+  | @ap_partwise_map (inr b) (inr b') p := ap (inr ∘ h) (lift.down (sum.encode p))
   | @ap_partwise_map (inl a) (inr b) p := empty.cases_on _ (lift.down (sum.encode p))
   | @ap_partwise_map (inr a) (inl b) p := empty.cases_on _ (lift.down (sum.encode p))
 
@@ -135,3 +135,24 @@ section ex8
     reflexivity,
   end
 end ex8
+
+section ex9
+  open function prod prod.ops sum
+  variables {A B X : Type}
+
+  definition is_equiv_sum_rec_unc : is_equiv ((uncurry sum.rec) : (A → X) × (B → X) → (A + B → X)) :=
+  is_equiv.adjointify (uncurry sum.rec)
+                      (λ g : A + B → X, (g ∘ inl, g ∘inr))
+                      (take g : A + B → X,
+                        show (uncurry sum.rec) (g ∘ inl, g ∘ inr) = g, 
+                        begin
+                          eapply eq_of_homotopy,
+                          intro x, induction x,
+                          all_goals reflexivity,
+                        end)
+                      (take h : (A → X) × (B → X),
+                        show ((uncurry sum.rec h) ∘inl, (uncurry sum.rec h) ∘inr) = h, from
+                         match h with
+                         | (h₁, h₂) := rfl
+                         end)
+end ex9
