@@ -1,4 +1,4 @@
-import init.default types.pi function_lemmas types.sum
+import init.default types.pi types.sum types.arrow
 open eq
 
 section ex1
@@ -58,16 +58,16 @@ section ex5
     calc
       (precomp_tr_constant f p (precomp_tr_constant_inv f p q))
           = tr_constant p (f x) ⬝ ((tr_constant p (f x))⁻¹ ⬝ q)  : rfl
-      ... = (tr_constant p (f x) ⬝ (tr_constant p (f x))⁻¹) ⬝ q  : by rewrite con.assoc'
-      ... = idp ⬝ q                                             :  by rewrite con.right_inv
+      ... = (tr_constant p (f x) ⬝ (tr_constant p (f x))⁻¹) ⬝ q  : !con.assoc'
+      ... = idp ⬝ q                                             : !con.right_inv
       ... = q                                                   : idp_con)
 
   (take q : f x = f y,
     calc
       (precomp_tr_constant_inv f p (precomp_tr_constant f p q))
            = (tr_constant p (f x))⁻¹ ⬝ (tr_constant p (f x) ⬝ q) : rfl
-       ... = ((tr_constant p (f x))⁻¹ ⬝ tr_constant p (f x)) ⬝ q : by rewrite con.assoc'
-       ... = idp ⬝ q                                            : by rewrite  con.left_inv
+       ... = ((tr_constant p (f x))⁻¹ ⬝ tr_constant p (f x)) ⬝ q : !con.assoc'
+       ... = idp ⬝ q                                            : !con.left_inv
        ... = q                                                  : idp_con)
 end ex5
 
@@ -97,9 +97,10 @@ section ex7
   have r₂ : (p ▸ h (pr₁ x)) (pr₂ y) = (ap g p) ▸ h (pr₁ x) (pr₂ x), from
     calc
       transport (λ x, P(x) → P'(g x)) p (h (pr₁ x)) (pr₂ y)
-           = transport (P' ∘g) p (h (pr₁ x) (transport P (p⁻¹) (pr₂ y))) : func_transport p (h (pr₁ x)) (pr₂ y)
-       ... = transport (P' ∘g) p (h (pr₁ x) (pr₂ x))                     : ap _ (eq_tr_of_pathover q)⁻¹
-       ... = (ap g p) ▸ (h (pr₁ x) (pr₂ x))                               : tr_compose P' g p,
+           = transport (P' ∘ g) p
+               (h (pr₁ x) (transport P (p⁻¹) (pr₂ y)))  : arrow_transport p (h (pr₁ x)) (pr₂ y)
+       ... = transport (P' ∘ g) p (h (pr₁ x) (pr₂ x))   : ap _ (eq_tr_of_pathover q)⁻¹
+       ... = (ap g p) ▸ (h (pr₁ x) (pr₂ x))             : tr_compose P' g p,
   pathover_of_tr_eq (r₂⁻¹ ⬝ r₁)
 
   definition ap_componentwise_map :   ap (componentwise_map g h) (sigma_eq p q)
@@ -121,18 +122,19 @@ section ex8
   | partwise_map (inr b) := inr (h b)
 
 
-  definition ap_partwise_map : Π {x y : A + B} (p : x = y), (partwise_map g h x) = (partwise_map g h y)
+  definition ap_partwise_map : Π {x y : A + B} (p : x = y),
+                                 (partwise_map g h x) = (partwise_map g h y)
   | @ap_partwise_map (inl a) (inl a') p := ap (inl ∘ g) (lift.down (sum.encode p))
   | @ap_partwise_map (inr b) (inr b') p := ap (inr ∘ h) (lift.down (sum.encode p))
   | @ap_partwise_map (inl a) (inr b) p := empty.cases_on _ (lift.down (sum.encode p))
   | @ap_partwise_map (inr a) (inl b) p := empty.cases_on _ (lift.down (sum.encode p))
 
-  definition ap_partwise_map_eq_ap {x y : A + B} (p : x = y) : ap (partwise_map g h) p = ap_partwise_map g h p :=
+  definition ap_partwise_map_eq_ap {x y : A + B} (p : x = y)
+                                   : ap (partwise_map g h) p = ap_partwise_map g h p :=
   begin
     induction p,
     cases x,
-    reflexivity,
-    reflexivity,
+    all_goals reflexivity
   end
 end ex8
 
@@ -140,18 +142,18 @@ section ex9
   open function prod prod.ops sum
   variables {A B X : Type}
 
-  definition is_equiv_sum_rec_unc : is_equiv ((uncurry sum.rec) : (A → X) × (B → X) → (A + B → X)) :=
-  is_equiv.adjointify (uncurry sum.rec)
-                      (λ g : A + B → X, (g ∘ inl, g ∘inr))
+  definition is_equiv_sum_rec_unc : is_equiv (uncurry sum.rec) :=
+  is_equiv.adjointify (uncurry sum.rec : (A → X) × (B → X) → (A + B → X))
+                      (λ g : A + B → X, (g ∘ inl, g ∘ inr))
                       (take g : A + B → X,
-                        show (uncurry sum.rec) (g ∘ inl, g ∘ inr) = g, 
+                        show (uncurry sum.rec) (g ∘ inl, g ∘ inr) = g,
                         begin
                           eapply eq_of_homotopy,
                           intro x, induction x,
                           all_goals reflexivity,
                         end)
                       (take h : (A → X) × (B → X),
-                        show ((uncurry sum.rec h) ∘inl, (uncurry sum.rec h) ∘inr) = h, from
+                        show ((uncurry sum.rec h) ∘ inl, (uncurry sum.rec h) ∘ inr) = h, from
                          match h with
                          | (h₁, h₂) := rfl
                          end)
