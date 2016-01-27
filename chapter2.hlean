@@ -1,4 +1,4 @@
-import init.default types.pi types.sum types.arrow
+import init.default types.pi types.sum types.arrow function_lemmas
 open eq
 
 section ex1
@@ -140,21 +140,59 @@ end ex8
 
 section ex9
   open function prod prod.ops sum
-  variables {A B X : Type}
 
-  definition is_equiv_sum_rec_unc : is_equiv (uncurry sum.rec) :=
-  is_equiv.adjointify (uncurry sum.rec : (A → X) × (B → X) → (A + B → X))
-                      (λ g : A + B → X, (g ∘ inl, g ∘ inr))
-                      (take g : A + B → X,
-                        show (uncurry sum.rec) (g ∘ inl, g ∘ inr) = g,
-                        begin
-                          eapply eq_of_homotopy,
-                          intro x, induction x,
-                          all_goals reflexivity,
-                        end)
-                      (take h : (A → X) × (B → X),
-                        show ((uncurry sum.rec h) ∘ inl, (uncurry sum.rec h) ∘ inr) = h, from
-                         match h with
-                         | (h₁, h₂) := rfl
-                         end)
+  section non_dep
+    variables {A B X : Type}
+
+    definition is_equiv_sum_rec_unc : is_equiv (uncurry sum.rec) :=
+    is_equiv.adjointify (uncurry sum.rec : (A → X) × (B → X) → (A + B → X))
+                        (λ g : A + B → X, (g ∘ inl, g ∘ inr))
+                        (take g : A + B → X,
+                          show (uncurry sum.rec) (g ∘ inl, g ∘ inr) = g,
+                          begin
+                            eapply eq_of_homotopy,
+                            intro x, induction x,
+                            all_goals reflexivity,
+                          end)
+                        (take h : (A → X) × (B → X),
+                          show ((uncurry sum.rec h) ∘ inl, (uncurry sum.rec h) ∘ inr) = h, from
+                          match h with
+                          | (h₁, h₂) := rfl
+                          end)
+  end non_dep
+
+  section dep
+    variables {A B : Type} {C : A + B → Type}
+
+    definition is_equiv_sum_rec_unc' :
+    is_equiv (uncurry sum.rec : (Π a, C (inl a)) × (Π b, C (inr b)) → Πx, C x) :=
+      is_equiv.adjointify (uncurry sum.rec)
+                          (λ g : Πx, C x, (g ∘₁ inl, g ∘₁ inr))
+                          (take g : Πx, C x,
+                            show (uncurry sum.rec) (g ∘₁ inl, g ∘₁ inr) = g,
+                            begin
+                              eapply eq_of_homotopy,
+                              intro x, induction x,
+                              all_goals reflexivity,
+                            end)
+                          (take h : (Πa, C (inl a)) × (Πb, C (inr b)),
+                            show ((uncurry sum.rec h) ∘₁ inl, (uncurry sum.rec h) ∘₁ inr) = h, from
+                            match h with
+                            | (h₁, h₂) := rfl
+                            end)
+  end dep
 end ex9
+
+section ex10
+  open sigma sigma.ops
+  variables {A : Type} {B : A → Type} {C : (Σ (a : A), B a) → Type}
+
+  definition rearrange : (Σ (x : A) (y : B x), C ⟨x, y⟩) → (Σ (p : Σ (x : A), B x), C p)
+  | rearrange ⟨x, ⟨y, c⟩⟩ := ⟨⟨x, y⟩, c⟩
+
+  definition is_equiv_rearrange : is_equiv (rearrange : (Σx y, C ⟨x, y⟩) → sigma C) :=
+    is_equiv.adjointify rearrange
+                        (λ t, match t with ⟨⟨x, y⟩, c⟩ := ⟨x, ⟨y, c⟩⟩ end)
+                        (by intro p; cases p with [p₁, p₂]; cases p₁; reflexivity)
+                        (by intro t; cases t with [t₁, t₂]; cases t₂; reflexivity)
+end ex10
