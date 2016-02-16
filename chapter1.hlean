@@ -167,7 +167,7 @@ section ex6
     ... = transport C (eq_of_homotopy (λ x, rfl)) (f a b)     : by rewrite p
     ... = refl (make_pair a b) ▸ f a b                        : by rewrite eq_of_homotopy_idp
     ... = f a b                                               : rfl
-end ex6 
+end ex6
 
 section ex7
   open sigma.ops
@@ -336,7 +336,7 @@ section ex8
                             ... = a * (b * (succ c))  : rfl)
 
   definition semiring := {| algebra.semiring ℕ,
-                            is_hset_carrier := is_hset_of_decidable_eq,
+                            is_hset_carrier := is_set_of_decidable_eq,
                             add := add,
                             mul := mul,
                             zero := 0,
